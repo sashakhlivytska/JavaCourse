@@ -1,50 +1,42 @@
-import import java.util.ArrayList;
+import lab5.exceptions.AccountNotFoundException;
+import lab5.exceptions.InsufficientFundsException;
+import lab5.exceptions.NegativeAmountException;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class Bank {
-    private final List<BankAccount> accountList;
-    private int accountIdCounter = 0;
-
-    public Bank(List<BankAccount> accountList) {
-        this.accountList = new ArrayList<>(accountList);
-    }
+    private List<BankAccount> accounts;
 
     public Bank() {
-        this.accountList = new ArrayList<>();
+        this.accounts = new ArrayList<>();
     }
 
-    public BankAccount createAccount(String accountName, double initialDeposit) {
-        BankAccount newAccount = new BankAccount(accountIdCounter++, accountName, initialDeposit);
-        accountList.add(newAccount);
+    public BankAccount createAccount(String accountName, double initialDeposit) throws NegativeAmountException {
+        int accountNumber = accounts.size() + 1;
+
+        if(initialDeposit < 0) throw new NegativeAmountException("Negative initial deposit value: " + initialDeposit);
+        
+        BankAccount newAccount = new BankAccount(accountNumber, accountName, initialDeposit);
+        accounts.add(newAccount);
         return newAccount;
     }
 
-    public Optional<BankAccount> findAccount(int accountNumber) {
-        return accountList.stream()
-                .filter(account -> account.getAccountNumber() == accountNumber)
-                .findAny();
+    public BankAccount findAccount(int accountNumber) throws AccountNotFoundException {
+        for (BankAccount account : accounts) {
+            if (account.getAccountNumber() == accountNumber) {
+                return account;
+            }
+        }
+        throw new AccountNotFoundException("Account not found with account number: " + accountNumber);
     }
 
     public void transferMoney(int fromAccountNumber, int toAccountNumber, double amount)
-            throws NegativeAmountException, AccountNotFoundException, InsufficientFundsException {
+            throws AccountNotFoundException, InsufficientFundsException, NegativeAmountException {
+        BankAccount fromAccount = findAccount(fromAccountNumber);
+        BankAccount toAccount = findAccount(toAccountNumber);
 
-        if (amount < 0) {
-            throw new NegativeAmountException("Transfer amount cannot be negative");
-        }
-
-        BankAccount from = findAccount(fromAccountNumber)
-                .orElseThrow(() -> new AccountNotFoundException("Account with number " + fromAccountNumber + " not found"));
-
-        BankAccount to = findAccount(toAccountNumber)
-                .orElseThrow(() -> new AccountNotFoundException("Account with number " + toAccountNumber + " not found"));
-
-        if (from.getBalance() < amount) {
-            throw new InsufficientFundsException("Account with number " + fromAccountNumber +
-                    " has not enough funds to transfer " + amount);
-        }
-
-        from.withdraw(amount);
-        to.deposit(amount);
+        fromAccount.withdraw(amount);
+        toAccount.deposit(amount);
     }
 }
