@@ -1,3 +1,6 @@
+import lab4.DecodeMethods.CaesarCipherDecoder;
+import lab4.DecodeMethods.RankCipherDecoder;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
