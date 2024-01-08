@@ -1,3 +1,5 @@
+import lab4.Decoder;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,19 +9,15 @@ import java.util.stream.Collectors;
 public class CaesarCipherDecoder implements Decoder {
     private final List<Character> cipherAlphabet;
     private final Map<Character, Character> cipherCodes;
-    private final Pattern encodedTestPattern;
+    private final Pattern encodedTestPatter;
 
     public CaesarCipherDecoder(List<Character> cipherAlphabet) {
         this.cipherAlphabet = new ArrayList<>(cipherAlphabet);
-        cipherCodes = cipherAlphabet.stream().collect(Collectors.toMap(
-                consonant -> getNextConsonant(consonant),
+        cipherCodes =  cipherAlphabet.stream().collect(Collectors.toMap(
+                consonant -> cipherAlphabet.get((cipherAlphabet.indexOf(consonant) + 1) % cipherAlphabet.size() ),
                 consonant -> consonant
         ));
-        encodedTestPattern = compileTestPattern();
-    }
-    private char getNextConsonant(char consonant) {
-        int index = (cipherAlphabet.indexOf(consonant) + 1) % cipherAlphabet.size();
-        return cipherAlphabet.get(index);
+        encodedTestPatter = compileTestPattern();
     }
 
     public String decode(String word) {
@@ -32,7 +30,7 @@ public class CaesarCipherDecoder implements Decoder {
     }
 
     public boolean isEncoded(String word) {
-        return encodedTestPattern.matcher(word).matches();
+        return encodedTestPatter.matcher(word).matches();
     }
 
     private Pattern compileTestPattern() {
