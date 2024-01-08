@@ -1,42 +1,49 @@
-import java.math.BigDecimal;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class BankAccount {
-    private final int accountNumber;
-    private String accountName;
-    private BigDecimal balance;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-    public BankAccount(int accountNumber, String accountName, double balance) {
-        this.accountNumber = accountNumber;
-        this.accountName = accountName;
-        this.balance = new BigDecimal(balance);
+import lab5.bankAccount.BankAccount;
+import lab5.exceptions.InsufficientFundsException;
+import lab5.exceptions.NegativeAmountException;
+
+
+public class BankAccountTest {
+    private BankAccount account;
+
+    @BeforeEach
+    void setUp() {
+
+        account = new BankAccount(1, "John", 1000);
     }
 
-    public BankAccount(int accountNumber, String accountName) {
-        this(accountNumber, accountName, 0);
+    @Test
+    public void testDeposit() throws NegativeAmountException {
+        account.deposit(500);
+        assertEquals(1500, account.getBalance());
     }
 
-    public void deposit(double amount) throws NegativeAmountException {
-        if (amount < 0) {
-            throw new NegativeAmountException("Deposit amount cannot be negative");
-        }
-
-        balance = balance.add(new BigDecimal(amount));
+    @Test
+    public void testNegativeAmountExceptionOnDeposit() {
+        assertThrows(NegativeAmountException.class, () -> account.deposit(-100));
     }
 
-    public void withdraw(double amount) throws NegativeAmountException, InsufficientFundsException {
-        if (amount < 0) {
-            throw new NegativeAmountException("Withdraw amount cannot be negative");
-        }
-        if (amount > balance.doubleValue()) {
-            throw new InsufficientFundsException("Insufficient funds to withdraw " + amount);
-        }
-
-        balance = balance.subtract(new BigDecimal(amount));
+    @Test
+    public void testWithdraw() throws NegativeAmountException, InsufficientFundsException {
+        account.withdraw(500);
+        assertEquals(500, account.getBalance());
     }
 
-    public double getBalance() {
-        return balance.doubleValue();
+    @Test
+    public void testInsufficientFundsExceptionOnWithdraw() {
+        assertThrows(InsufficientFundsException.class, () -> account.withdraw(1500));
     }
+
+    @Test
+    public void testNegativeAmountExceptionOnWithdraw() {
+        assertThrows(NegativeAmountException.class, () -> account.withdraw(-100));
+    }
+}
 
     public String getAccountSummary() {
         return "Bank account " + accountName + " (" + accountNumber + "), balance: " + balance;
